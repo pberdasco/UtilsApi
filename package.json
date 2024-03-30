@@ -1,0 +1,36 @@
+{
+  "name": "utilsapi",
+  "version": "1.0.0",
+  "description": "APIs Node.js para: enviar mails, hacer uploads de archivos y fotos, procesar planillas excel, otros",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pberdasco/UtilsApi.git"
+  },
+  "keywords": [
+    "email",
+    "excel",
+    "upload",
+    "node",
+    "express",
+    "api"
+  ],
+  "author": "Pablo Berdasco",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pberdasco/UtilsApi/issues"
+  },
+  "homepage": "https://github.com/pberdasco/UtilsApi#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}
