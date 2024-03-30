@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "APIs Node.js para: enviar mails, hacer uploads de archivos y fotos, procesar planillas excel, otros",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "test": "npm run test"
   },
@@ -31,6 +32,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "eslint-plugin-node": "^11.1.0"
   }
 }
