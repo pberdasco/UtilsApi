@@ -5,6 +5,7 @@
 import * as XLSX from "xlsx/xlsx.mjs";
 import * as fs from "fs";
 import { join } from "path";
+import {styleText} from "node:util";
 
 function findHeaderRow(sheet, targetValue) {
     // Recorrer las celdas de la hoja hasta encontrar el valor objetivo
@@ -39,6 +40,7 @@ function getSheetWithHeader(sheet, startRow) {
 export default class ExcelController {
 
     static async getSheet(req, res, next) {
+        console.log(styleText("blue", "Ejecutando ExcelController.getSheet"));
         try{
             XLSX.set_fs(fs);
             const excelFileName = req.params.file;
