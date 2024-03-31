@@ -1,22 +1,23 @@
 import { createTransport } from 'nodemailer';
+import { decrypt } from './cript_aux.js';
 
 let transporter = null;
 let currentCredentials = null;
 
 async function getEncryptedConfig(req, res) {
     try {
-        //TODO: ver de donde levanta las credenciales encriptadas
-        // tambien ver si se implementa algo para no buscarlas todo el tiempo (cache o algo asi)
+        //TODO: credenciales encriptadas ahora en variables de entorno. Quizas convenga mandarlas a BD o similar.
+        // tambien (si van a bd) ver si se implementa algo para no buscarlas todo el tiempo (cache o algo asi)
         const credentials = {
-            user: 'p.berdasco@gmail.com',
-            pass: 'olstfkinadyvvcgt',
+            user: decrypt(process.env.MAIL_U),  //'p.berdasco@gmail.com',
+            pass: decrypt(process.env.MAIL_P)   //'olstfkinadyvvcgt',
         };
         return credentials
     } catch (error) {
         console.error("Error al obtener las credenciales:", error);
         throw new Error("Error al obtener las credenciales");
     }
-}
+} 
 
 export default class MailController {
 
