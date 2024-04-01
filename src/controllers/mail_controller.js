@@ -9,8 +9,8 @@ async function getEncryptedConfig(req, res) {
         //TODO: credenciales encriptadas ahora en variables de entorno. Quizas convenga mandarlas a BD o similar.
         // tambien (si van a bd) ver si se implementa algo para no buscarlas todo el tiempo (cache o algo asi)
         const credentials = {
-            user: decrypt(process.env.MAIL_U),  //'p.berdasco@gmail.com',
-            pass: decrypt(process.env.MAIL_P)   //'olstfkinadyvvcgt',
+            user: decrypt(process.env.MAIL_U),  
+            pass: decrypt(process.env.MAIL_P)   
         };
         return credentials
     } catch (error) {
@@ -24,7 +24,7 @@ export default class MailController {
     static async send(req, res, next){
         try {
             // captura y validacion de los parametros en el body
-            const { to, subject, text } = req.body;
+            const { to, subject, text, html } = req.body;
             if (!to || !subject || !text) {
                 return res.status(400).json({ success: false, error: "Faltan campos obligatorios" });
                 //TODO: probar si el from tambien se puede pedir para poner uno diferente al de las credenciales...
@@ -36,7 +36,6 @@ export default class MailController {
             // si aun no cree el transporter o cambiaron las credenciales debo crearlo
             if (!transporter || newCredentials.email !== currentCredentials.email || newCredentials.password !== currentCredentials.password) {
                     currentCredentials = newCredentials;
-                    console.log("creando transport");
                     transporter = createTransport({
                         service: 'gmail',
                         auth: {
@@ -46,12 +45,18 @@ export default class MailController {
                     });
             }
 
-            await transporter.sendMail({
+            const mailOptions = {
                 from: currentCredentials.email,
                 to,
                 subject,
                 text,
-            });
+            };
+            // html como opcional
+            if (html) {
+                mailOptions.html = html;
+            }
+
+            await transporter.sendMail(mailOptions);
             
             res.json({ success: true });
         }catch (error){
