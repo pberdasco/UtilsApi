@@ -82,4 +82,20 @@ export default class UploadController {
         }
     }
 
+    static async getFile(req, res, next){
+        const projectDir = process.env.PROJECT_DIR;
+        const uploadFolder = process.env.UPLOAD_IMAGES;
+        const { filename } = req.params;
+        
+        const filePath = join(projectDir, uploadFolder, filename);
+
+        try {
+            await fs.promises.access(filePath, fs.constants.F_OK);
+            res.sendFile(filePath);
+        } catch (error) {
+            console.error("El archivo no existe:", error);
+            res.status(404).send("El archivo no existe");
+        }
+    }
+
 }
