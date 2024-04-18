@@ -1,15 +1,76 @@
+// En deploy recordar instalar estas dependencias
+// # Instalar dependencias requeridas
+// RUN apt-get update && apt-get install -y \
+//     graphicsmagick \
+//     ghostscript \
+//     && rm -rf /var/lib/apt/lists/*
+//  y setear los path a los directorios bin de ambos.
+
 /* eslint-disable no-unused-vars */
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { fromPath as pdf2picFromPath } from "pdf2pic";
 
 import { join } from "path";
 import fs from "fs";
 
 export default class CheckAI {
 
+    static saveBase64Image(base64String, filePath) {
+        // Remover la parte del encabezado del base64 (por ejemplo, "data:image/png;base64,")
+        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+    
+        // Decodificar el base64 a datos binarios
+        const imageData = Buffer.from(base64Data, 'base64');
+    
+        // Guardar los datos binarios en un archivo
+        fs.writeFile(filePath, imageData, 'binary', (err) => {
+            if (err) {
+                console.error('Error al guardar la imagen:', err);
+            } else {
+                console.log('La imagen se ha guardado correctamente en', filePath);
+            }
+        });
+    }
+
+    static async pdfToPng(pdfFilePath) {
+        const tempDir = join(process.env.PROJECT_DIR, process.env.TEMP_FILES);
+        const randomNumber = Math.floor(Math.random() * 100000); // Genera un número aleatorio entre 0 y 99999
+        const filenamePrefix = "image";
+        const filename = `${filenamePrefix}-${randomNumber}.png`;
+
+        // Configurar pdf2pic
+        const options = {
+            density: 100,           // Resolución de la imagen
+            saveFilename: filename, // Nombre de archivo de salida
+            savePath: tempDir,      // Ruta donde se guardarán las imágenes
+            format: "png",          // Formato de salida
+            width: 850,             // Ancho de la imagen en píxeles
+            height: 1100            // Alto de la imagen en píxeles
+        };
+
+        try{
+            // Inicializar pdf2pic con las opciones
+            const convertPdfToPng = pdf2picFromPath(pdfFilePath, options);
+
+            // Convertir PDF a imagen PNG (la pagina 1 a base64)
+            const output = await convertPdfToPng(1, { responseType: "base64" }); 
+            
+            const filePath = "output.png"; // Ruta del archivo de salida (con extensión .png)
+            CheckAI.saveBase64Image(output.base64, filePath);
+
+            return output.base64;
+        }catch(error) {
+            console.error("Error durante la conversión del PDF a PNG:", error);
+            throw error;
+        }
+      
+    }
+
     static fileToGenerativePart(content, mimeType) {
         return {
           inlineData: {
-            data: Buffer.from(content).toString("base64"),
+            // data: Buffer.from(content).toString("base64"),
+            data: content,
             mimeType
           },
         };
@@ -56,23 +117,21 @@ export default class CheckAI {
         const uploadFolder = process.env.UPLOAD_IMAGES;
         const { filename } = req.params;
         // Ajustar por tipo de archivo (png / jpeg / pdf)
-        let mimeType = "image/png"
+        let mimeType = "image/png"  // si es pdf lo deja en image/png porque lo va a convertir
         if (filename.endsWith('.jpeg')) mimeType = "image/jpeg"
-        if (filename.endsWith('.pdf')){
-            // convertir con pdf2pic a png
-        } 
-
         const filePath = join(projectDir, uploadFolder, filename);
-console.log(filePath);
 
         try {
-            // Verificar si el archivo existe
-            await fs.promises.access(filePath, fs.constants.F_OK);
             // Leer el contenido del archivo
-            const fileContent = await fs.promises.readFile(filePath);
+            let fileContent
+            if (filename.endsWith('.pdf')){
+                fileContent = await CheckAI.pdfToPng(filePath);
+            }else {
+                fileContent = await fs.promises.readFile(filePath, "base64");
+            }
+            
             // Ejecutar la instrucción contra el modelo, pasando el contenido del archivo
             const result = await CheckAI.generate(fileContent, mimeType);
-    console.log(result);
             res.json(result)
         } catch (error) {
             console.error("Error en CheckAI.factura:", error);
