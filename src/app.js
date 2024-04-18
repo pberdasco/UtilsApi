@@ -4,6 +4,7 @@ import cors from "cors";
 import { uploadsRouter } from "./routers/uploads_router.js";
 import { excelRouter } from "./routers/excel_router.js";
 import { mailRouter } from "./routers/mail_router.js";
+import { checkAIRouter } from "./routers/checkAI_router.js";
 
 
 process.loadEnvFile(); // desde node v21 permite reemplazar a 3as partes (config)
@@ -17,6 +18,7 @@ app.use(cors()); // cors debe ir antes de los routers
 app.use("/upload", uploadsRouter);
 app.use("/excel", excelRouter);
 app.use("/mail", mailRouter); 
+app.use("/ai", checkAIRouter);
 
 app.use((req, res) => res.status(404).json({message: "no existe el endpoint"}));
 
