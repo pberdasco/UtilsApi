@@ -82,6 +82,25 @@ export default class UploadController {
         }
     }
 
+    static async deleteFile(req, res, next){
+        const projectDir = process.env.PROJECT_DIR;
+        const uploadFolder = process.env.UPLOAD_IMAGES;
+        const { filename } = req.params;
+        
+        const filePath = join(projectDir, uploadFolder, filename);
+
+        try {
+            // Eliminar el archivo
+            await fs.promises.unlink(filePath);
+
+            console.log("Archivo eliminado:", filePath);
+            res.status(200).send("Archivo eliminado correctamente");
+        } catch (error) {
+            console.error("Error al intentar eliminar el archivo:", error);
+            res.status(500).send("Error al intentar eliminar el archivo");
+        }
+    }
+    
     static async getFile(req, res, next){
         const projectDir = process.env.PROJECT_DIR;
         const uploadFolder = process.env.UPLOAD_IMAGES;
